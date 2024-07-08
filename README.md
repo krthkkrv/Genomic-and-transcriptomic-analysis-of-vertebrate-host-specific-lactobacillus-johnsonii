@@ -1,2 +1,2 @@
-# Genomic-and-transcriptomic-analysis-of-vertebrate-host-specific-lactobacillus-johnsonii
-The repository holds the code for used to generate the data reported in the manuscript "Genomic and transcriptomic insights into vertebrate host-specific Lactobacillus johnsonii adaptation in the gastrointestinal tract".
+# Genomic-and-transcriptomic-analysis-of-vertebrate-host-specific-_Lactobacillus-johnsonii_
+The repository holds the code used to generate the data reported in the manuscript "Genomic and transcriptomic insights into vertebrate host-specific _Lactobacillus johnsonii_ adaptation in the gastrointestinal tract".
