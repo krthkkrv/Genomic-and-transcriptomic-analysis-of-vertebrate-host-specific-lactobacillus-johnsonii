@@ -27,7 +27,7 @@ sed -n 's/|strain|//g' -n 's/|isolation source|//g' -n 's/|host|//g' -n 's/|geog
 	- Pairwise whole genome sequence average nucleotide identity (ANI) score of the assemblies is <0.999.
 	- Has the least number of sequences contigs in the group.
 	- Has the largest relative length of the longest and shortest contig.
-9. Finally, if the number of genome assemblies in each host group was less than 5, they were removed from the analysis.
+9. Finally, if the number of genome assemblies in each host group was less than 5, they were removed from the analysis. This resulted in a final data size of 42 genome assemblies.
     
 | Host of origin  | Number of assemblies |
 | ------------- | ------------- |
@@ -35,4 +35,20 @@ sed -n 's/|strain|//g' -n 's/|isolation source|//g' -n 's/|host|//g' -n 's/|geog
 | Human  | 10  |
 | Avian | 9 |
 | Swine | 6 |
+
+The RefSeq assemblies of the 42 strains were downloaded by creating a space-separated query text file with the assembly accession number and strain name.
+
+```
+cat query.txt |while read -r g
+do 
+query=$(echo $g | awk 'BEGIN{FS=" "}{print $1}')
+esearch -db assembly -query $query </dev/null \
+        | esummary \
+        | xtract -pattern DocumentSummary -element FtpPath_RefSeq \
+        | while read -r url ; do
+            fname=$(echo $url | grep -o 'GCF_.*' | sed 's/$/_genomic.fna.gz/') ;
+            wget "$url/$fname" ;
+        done ;
+done
+```
 
