@@ -1,7 +1,70 @@
+The whole genome average nucleotide identity analysis was done using the contig database generated through anvi'o.
+
 ```
-anvi-compute-genome-similarity --external-genomes 84external-genomes.txt \
-                               --program fastANI \
-                               --output-dir ANI84 \
-                               --num-threads 6 \
-                               --pan-db pangenome_83/LJ_83
+anvi-script-gen-genomes-file --input-dir contig_db/ \
+                             -o external-genomes.txt
+
+anvi-compute-genome-similarity --external-genomes external-genomes.txt \
+                               --program pyANI \
+                               --output-dir LJ_ANI \
+                               --num-threads 6                           
+```
+
+The resulting ANIb_percentage_identity.txt file, containing the ANI scores was then used to build a heat map and a dendrogram in R.
+
+```{r pyAI heat map}
+library(tidyverse)
+library(ComplexHeatmap)
+library(dendextend)
+library(dendsort)
+library(circlize)
+
+ANI <- read.table('ANIb_percentage_identity.txt', header = T) %>% 
+  column_to_rownames("key") %>% 
+  as.matrix()
+colnames(ANI) <- c()
+
+# Building row and column dendrogram using dendsort and dendextend
+row_dend = dendsort(hclust(dist(ANI), method = "ward.D2"))
+row_dend = color_branches(row_dend, k = 8) # `color_branches()` returns a dendrogram object
+col_dend = dendsort(hclust(dist(ANI), method = "ward.D2"))
+
+# Set annotation
+strain_info <- read.csv("strain_info_meta.csv", header = T) #strains_info_meta.csv is a metadata file with information on the source of the isolate and geography.
+row_labels = structure(strain_info$Strain_Name, names = strain_info$isolate)
+
+# Matching the order of strain names in the dendrogram and metadata
+idx <- match(strain_info$isolate,labels(col_dend))
+tmp <- strain_info[idx,]
+ann <- data.frame(tmp$Host)
+colnames(ann) <- c('host')
+# ann$host <- as.factor(ann$host)
+# rownames(ann) <- c()
+colours <- list('host' = c('Human' = 'red2', 'Rodent' = 'royalblue', 'Swine' = 'pink', 'Avian' = 'gold', "OG" = "white"))
+
+colAnn <- HeatmapAnnotation(df = ann,
+  which = 'col',
+  col = colours,
+  annotation_width = unit(c(1, 4), 'cm'),
+  gap = unit(1, 'mm'))
+
+leftAnn <- rowAnnotation(foo = anno_block(gp = gpar(fill = 2:4),
+        labels = c("group1", "group2", "group3", "group4", "root"), 
+        labels_gp = gpar(col = "white", fontsize = 10)))
+
+# Adding color for the ANI score ramp using circlize
+col_fun <-  colorRamp2(c(0.85, 0.95, 0.975,1), c("black", "blue", "white", "red"))
+
+# Building final heatmap using ComplexHeatmap
+Heatmap(ANI, name = "pyANI", show_column_dend = FALSE, 
+        cluster_rows = row_dend, cluster_columns = col_dend,
+        row_dend_reorder = T, column_dend_reorder = T, row_dend_width = unit(5, "cm"),
+        col = col_fun, 
+        row_labels = row_labels[rownames(ANI)],
+        row_split = 8, column_split = 8,
+        # left_annotation = leftAnn,
+        # top_annotation_height=unit(1.0,"cm"), 
+        top_annotation= colAnn, 
+        row_names_gp = gpar(fontsize = 7))
+
 ```
