@@ -5,4 +5,4 @@ The key steps are:
 2. Annotating and Building a pangenome
 3. Average nucleotide analysis
 4. Maximum likelihood tree analysis
-5. Functional enrichment analysis ad rodent associated genes
+5. Functional enrichment analysis and rodent-associated genes
