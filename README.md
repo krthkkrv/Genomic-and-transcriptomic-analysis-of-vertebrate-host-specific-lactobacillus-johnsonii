@@ -3,6 +3,6 @@ The repository holds the code used to generate the comparative genomics data rep
 The key steps are: 
 1. Data selection
 2. Annotating and Building a pangenome
-3. Average nucleotide analysis
+3. Average nucleotide identity analysis
 4. Maximum likelihood tree analysis
 5. Functional enrichment analysis and identification of rodent-associated genes
